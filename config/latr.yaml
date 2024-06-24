@@ -18,6 +18,7 @@ PREDICT_BATCH_SIZE: 16
 
 STEP_MODE: FALSE
 END_STEP: 50000
+show_loss_after_steps: 200
 eval_after_steps: 2000
 
 max_predict_length: 128

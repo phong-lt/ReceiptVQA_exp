@@ -26,6 +26,7 @@ class Executor():
         self.config = config
         self.evaltype = evaltype
         self.predicttype = predicttype
+        self.best_score = 0
         if self.mode == "train":
             self._create_data_utils()       
 
@@ -51,9 +52,14 @@ class Executor():
             if os.path.isfile(os.path.join(self.config.SAVE_PATH, "last_ckp.pth")):
                 print("###Load trained checkpoint ...")
                 ckp = torch.load(os.path.join(self.config.SAVE_PATH, "last_ckp.pth"))
-                print(f"\t- Last train epoch: {ckp['epoch']}")
+                try:
+                    print(f"\t- Last train epoch: {ckp['epoch']}")
+                except:
+                    print(f"\t- Last train step: {ckp['step']}")
                 self.model.load_state_dict(ckp['state_dict'])
                 self.optim.load_state_dict(ckp['optimizer'])
+                self.scheduler.load_state_dict(ckp['scheduler'])
+                self.best_score = ckp['best_score']
             
         if self.mode in ["eval", "predict"]:
             self.init_eval_predict_mode()
@@ -78,8 +84,6 @@ class Executor():
         if not os.path.exists(folder):
             os.mkdir(folder)
 
-
-        best_f1 = 0
         m_f1 = 0
         m_epoch = 0
 
@@ -100,13 +104,14 @@ class Executor():
                 m_epoch = epoch
 
             if self.SAVE:
-                if best_f1 < f1:
-                    best_f1 = f1
+                if self.best_score < f1:
+                    self.best_score = f1
                     statedict = {
                         "state_dict": self.model.state_dict(),
                         "optimizer": self.optim.state_dict(),
                         "scheduler": self.scheduler.state_dict(),
                         "epoch": epoch,
+                        "best_score": self.best_score
                     }
 
                     filename = f"best_ckp.pth"
@@ -118,12 +123,16 @@ class Executor():
                             "optimizer": self.optim.state_dict(),
                             "scheduler": self.scheduler.state_dict(),
                             "epoch": epoch,
+                            "best_score": self.best_score
                         }
 
                 lfilename = f"last_ckp.pth"
                 torch.save(lstatedict, os.path.join(folder,lfilename))
         
         e_train_time = timer()
+        if m_f1 < self.best_score:
+            m_f1 = self.best_score
+            m_epoch = -1
         print(f"\n# BEST RESULT:\n\tEpoch: {m_epoch}\n\tBest F1: {m_f1:.4f}")
         print(f"#----------- TRAINING END-Time: { e_train_time-s_train_time} -----------------#")
         
@@ -133,13 +142,19 @@ class Executor():
         if os.path.isfile(os.path.join(self.config.SAVE_PATH, f"{self.evaltype}_ckp.pth")):
             print("###Load trained checkpoint ...")
             ckp = torch.load(os.path.join(self.config.SAVE_PATH, f"{self.evaltype}_ckp.pth"))
-            print(f"\t- Using {self.evaltype} train epoch: {ckp['epoch']}")
+            try:
+                print(f"\t- Using {self.evaltype} train epoch: {ckp['epoch']}")
+            except:
+                print(f"\t- Using {self.evaltype} train step: {ckp['step']}")
             self.model.load_state_dict(ckp['state_dict'])
 
         elif os.path.isfile(os.path.join('./models', f"{self.evaltype}_ckp.pth")):
             print("###Load trained checkpoint ...")
             ckp = torch.load(os.path.join('./models', f"{self.evaltype}_ckp.pth"))
-            print(f"\t- Using {self.evaltype} train epoch: {ckp['epoch']}")
+            try:
+                print(f"\t- Using {self.evaltype} train epoch: {ckp['epoch']}")
+            except:
+                print(f"\t- Using {self.evaltype} train step: {ckp['step']}")
             self.model.load_state_dict(ckp['state_dict'])
         
         else:
@@ -157,13 +172,19 @@ class Executor():
         if os.path.isfile(os.path.join(self.config.SAVE_PATH, f"{self.predicttype}_ckp.pth")):
             print("###Load trained checkpoint ...")
             ckp = torch.load(os.path.join(self.config.SAVE_PATH, f"{self.predicttype}_ckp.pth"))
-            print(f"\t- Using {self.predicttype} train epoch: {ckp['epoch']}")
+            try:
+                print(f"\t- Using {self.predicttype} train epoch: {ckp['epoch']}")
+            except:
+                print(f"\t- Using {self.predicttype} train step: {ckp['step']}")
             self.model.load_state_dict(ckp['state_dict'])
 
         elif os.path.isfile(os.path.join('./models', f"{self.predicttype}_ckp.pth")):
             print("###Load trained checkpoint ...")
             ckp = torch.load(os.path.join('./models', f"{self.predicttype}_ckp.pth"))
-            print(f"\t- Using {self.predicttype} train epoch: {ckp['epoch']}")
+            try:
+                print(f"\t- Using {self.predicttype} train epoch: {ckp['epoch']}")
+            except:
+                print(f"\t- Using {self.predicttype} train step: {ckp['step']}")
             self.model.load_state_dict(ckp['state_dict'])
         else:
             print(f"(!) {self.predicttype}_ckp.pth is required  (!)")
@@ -196,8 +217,10 @@ class Executor():
 
         if self.mode =='train':
             if self.config.STEP_MODE:
+                print("# Training on steps... #")
                 self._train_step()
             else:
+                print("# Training on epochs... #")
                 self.train()
         elif self.mode == 'eval':
             self.evaluate()
@@ -377,52 +400,112 @@ class Executor():
         assert self.config.END_STEP is not None
         assert self.config.END_STEP > 0
 
+        if not self.config.SAVE_PATH:
+            folder = './models'
+        else:
+            folder = self.config.SAVE_PATH
+        
+        if not os.path.exists(folder):
+            os.mkdir(folder)
+
         self.model.train()
+
         losses = 0
         current_step = 0
-        with tqdm(desc='Training on steps... ' , unit='it', total=self.config.END_STEP) as pbar:
-            while True:
-                for it, batch in enumerate(self.trainiter):
-                    decoder_attention_mask = batch['decoder_attention_mask'].to(self.config.DEVICE)
-                    labels = batch['labels'].type(torch.long).to(self.config.DEVICE)
+
+        m_f1 = 0
+        m_step = 0
+
+        print(f"#----------- START TRAINING -----------------#")
+        print(f"(!) Show train loss after each {self.config.show_loss_after_steps} steps")
+        print(f"(!) Evaluate after each {self.config.eval_after_steps} steps")
+        s_train_time = timer()
+
+        while True:
+            for batch in self.trainiter:
+                decoder_attention_mask = batch['decoder_attention_mask'].to(self.config.DEVICE)
+                labels = batch['labels'].type(torch.long).to(self.config.DEVICE)
 
 
-                    trg_input = labels[:, :-1]
-                    decoder_attention_mask = decoder_attention_mask[:, :-1]
+                trg_input = labels[:, :-1]
+                decoder_attention_mask = decoder_attention_mask[:, :-1]
 
-                    logits = self.model(pixel_values = batch['pixel_values'].to(self.config.DEVICE),
-                                        bbox = batch['bbox'].to(self.config.DEVICE),
-                                        input_ids = batch['input_ids'].to(self.config.DEVICE),
-                                        labels = trg_input,
-                                        attention_mask = batch['attention_mask'].to(self.config.DEVICE),
-                                        decoder_attention_mask = decoder_attention_mask,
-                                        bbox_attention_mask=batch['bbox_attention_mask'].to(self.config.DEVICE) ,
-                                        tokenized_ocr=batch['tokenized_ocr'].to(self.config.DEVICE))
+                logits = self.model(pixel_values = batch['pixel_values'].to(self.config.DEVICE),
+                                    bbox = batch['bbox'].to(self.config.DEVICE),
+                                    input_ids = batch['input_ids'].to(self.config.DEVICE),
+                                    labels = trg_input,
+                                    attention_mask = batch['attention_mask'].to(self.config.DEVICE),
+                                    decoder_attention_mask = decoder_attention_mask,
+                                    bbox_attention_mask=batch['bbox_attention_mask'].to(self.config.DEVICE) ,
+                                    tokenized_ocr=batch['tokenized_ocr'].to(self.config.DEVICE))
 
 
-                    self.optim.zero_grad()
+                self.optim.zero_grad()
 
-                    trg_out = labels[:, 1:]
+                trg_out = labels[:, 1:]
 
-                    loss = self.loss_fn(logits.reshape(-1, logits.shape[-1]), trg_out.reshape(-1))
-                    loss.backward()
+                loss = self.loss_fn(logits.reshape(-1, logits.shape[-1]), trg_out.reshape(-1))
+                loss.backward()
 
-                    self.optim.step()
+                self.optim.step()
 
-                    self.scheduler.step()
+                self.scheduler.step()
+                
+                losses += loss.data.item()
+
+                current_step += 1
+
+                if current_step % self.config.show_loss_after_steps == 0:
+                    print(f"[Step {current_step} | {int(current_step/self.config.END_STEP*100)}% completed] Train Loss: {losses / current_step}")
+
+                if current_step % self.config.eval_after_steps == 0:
+                    eval_loss = self._evaluate()
+                    res = self._evaluate_metrics()
+                    f1 = res["F1"]
+                    print(f'\tTraining Step {current_step}:')
+                    print(f'\tTrain Loss: {losses / current_step} - Val. Loss: {eval_loss:.4f}')
+                    print(res)
                     
-                    losses += loss.data.item()
+                    if m_f1 < f1:
+                        m_f1 = f1
+                        m_step = current_step
 
-                    pbar.set_postfix(loss=losses / (it + 1))
-                    pbar.update()
+                    if self.SAVE:
+                        if self.best_score < f1:
+                            self.best_score = f1
+                            statedict = {
+                                "state_dict": self.model.state_dict(),
+                                "optimizer": self.optim.state_dict(),
+                                "scheduler": self.scheduler.state_dict(),
+                                "step": current_step,
+                                "best_score": self.best_score
+                            }
 
-                    current_step += 1
+                            filename = f"best_ckp.pth"
+                            torch.save(statedict, os.path.join(folder,filename))
+                            print(f"!---------Saved {filename}----------!")
 
-                    if current_step == self.config.eval_after_steps:
-                        eval_loss = self._evaluate()
+                        lstatedict = {
+                                    "state_dict": self.model.state_dict(),
+                                    "optimizer": self.optim.state_dict(),
+                                    "scheduler": self.scheduler.state_dict(),
+                                    "step": current_step,
+                                    "best_score": self.best_score
+                                }
 
-                    if current_step >= self.config.END_STEP:
-                        return losses / self.config.END_STEP
+                        lfilename = f"last_ckp.pth"
+                        torch.save(lstatedict, os.path.join(folder,lfilename))
+
+                if current_step >= self.config.END_STEP:
+                    if m_f1 < self.best_score:
+                        m_f1 = self.best_score
+                        m_step = -1
+                    e_train_time = timer()
+                    print(f"\n# BEST RESULT:\n\tStep: {m_step}\n\tBest F1: {m_f1:.4f}")
+                    print(f"#----------- TRAINING END-Time: { e_train_time-s_train_time} -----------------#")
+                    return
+    
+        
     
     def infer_post_processing(self, out_ids):
         res = []
