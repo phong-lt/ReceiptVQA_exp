@@ -33,7 +33,7 @@ class Executor():
             self.model_config = AutoConfig.from_pretrained(config.backbone_name)
 
             self.model_config.update({"max_2d_position_embeddings" : config.max_2d_position_embeddings,
-                                "vit_model" : self.vit_model_name})
+                                "vit_model" : self.config.vit_model_name})
 
             self.model = LaTr(self.model_config)
 
@@ -61,7 +61,7 @@ class Executor():
             self.model_config = AutoConfig.from_pretrained(config.backbone_name)
 
             self.model_config.update({"max_2d_position_embeddings" : config.max_2d_position_embeddings,
-                                "vit_model" : self.vit_model_name})
+                                "vit_model" : self.config.vit_model_name})
 
 
             self.model = LaTr(self.model_config)
@@ -195,6 +195,8 @@ class Executor():
         log.start()
 
         if self.mode =='train':
+            if self.config.STEP_MODE:
+                self._train_step()
             self.train()
         elif self.mode == 'eval':
             self.evaluate()

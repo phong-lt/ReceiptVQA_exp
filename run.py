@@ -4,7 +4,7 @@ import argparse
 
 
 def parse_args():
-    parser = argparse.ArgumentParser(description='Seq2Seq Args')
+    parser = argparse.ArgumentParser(description='Exp Args')
 
     parser.add_argument("--mode", choices=['train', 'eval', 'predict'],
                       help='{train, eval, predict}',
