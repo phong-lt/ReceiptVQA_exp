@@ -213,7 +213,8 @@ class Executor():
 
         train_qa_df = pd.read_csv(self.config.qa_train_path)[["image_id", "question", "answer", "filename"]]
         val_qa_df = pd.read_csv(self.config.qa_val_path)[["image_id", "question", "answer", "filename"]]
-        
+        self.val_answer = list(val_qa_df["answer"])
+
         ocr_df = adapt_ocr(self.config.ocr_path)
 
         print("# Creating Datasets")
