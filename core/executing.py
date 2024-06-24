@@ -197,7 +197,8 @@ class Executor():
         if self.mode =='train':
             if self.config.STEP_MODE:
                 self._train_step()
-            self.train()
+            else:
+                self.train()
         elif self.mode == 'eval':
             self.evaluate()
         elif self.mode == 'predict':
