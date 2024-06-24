@@ -170,10 +170,10 @@ class Executor():
             return
 
         print("## START PREDICTING ... ")
-        print(f'\t#PREDICTION:\n')
 
         if self.config.get_predict_score:
             results, scores = self._evaluate_metrics()
+            print(f'\t#PREDICTION:\n')
             print(f'\t{scores}')
         else:
             preds = self.infer(self.predictiter, self.config.max_predict_length)
@@ -244,15 +244,16 @@ class Executor():
         print("# Creating DataLoaders")
        
         self.trainiter = DataLoader(dataset = self.train_data, 
-                                    batch_size=self.config.BATCH_SIZE, 
+                                    batch_size=self.config.TRAIN_BATCH_SIZE, 
                                     shuffle=True)
         self.valiter = DataLoader(dataset = self.val_data, 
-                                    batch_size=self.config.BATCH_SIZE)
+                                    batch_size=self.config.EVAL_BATCH_SIZE)
 
     def init_eval_predict_mode(self):
         self.tokenizer = AutoTokenizer.from_pretrained(self.config.backbone_name)
 
         if self.mode == "eval":
+            print("###Load eval data ...")
             val_qa_df = pd.read_csv(self.config.qa_val_path)[["image_id", "question", "answer", "filename"]]
         
             ocr_df = adapt_ocr(self.config.ocr_path)
@@ -288,12 +289,12 @@ class Executor():
                                                 max_answer_length = self.config.max_a_length)
             
             if self.config.get_predict_score:
-                self.predict_answer = list(val_qa_df["answer"])
+                self.predict_answer = list(predict_qa_df["answer"])
             else:
                 self.predict_answer = None
 
-            self.predictiter = DataLoader(dataset = self.val_data, 
-                                    batch_size=self.config.BATCH_SIZE)
+            self.predictiter = DataLoader(dataset = self.predict_data, 
+                                    batch_size=self.config.PREDICT_BATCH_SIZE)
 
     
     def _train_epoch(self, epoch):
@@ -465,10 +466,10 @@ class Executor():
     def _evaluate_metrics(self):
         if self.mode == "predict":
             pred = self.infer(self.predictiter, self.config.max_predict_length)
+            answers_gt = [i.strip().lower() for i in self.predict_answer]
         else:
             pred = self.infer(self.valiter, self.config.max_eval_length)
-
-        answers_gt = [i.strip().lower() for i in self.val_answer]
+            answers_gt = [i.strip().lower() for i in self.val_answer]
 
         answers_gen = [[i.strip().lower()] for i in pred]
 
