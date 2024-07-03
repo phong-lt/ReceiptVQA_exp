@@ -1,7 +1,15 @@
 import torch
 import torch.nn as nn
-from transformers import T5ForConditionalGeneration, ViTModel
+from transformers import T5ForConditionalGeneration, ViTModel, AutoConfig
 
+class LaTr_config:
+    def build(self, config):
+        model_config = AutoConfig.from_pretrained(config.backbone_name)
+
+        model_config.update({"max_2d_position_embeddings" : config.max_2d_position_embeddings,
+                                "vit_model" : self.config.vit_model_name})
+        
+        return model_config
 
 class SpatialModule(nn.Module):
     def __init__(self, config):

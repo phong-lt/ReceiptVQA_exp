@@ -41,6 +41,8 @@ qa_predict_path:  "./ReceiptVQA/ReceiptVQA_dev.csv"
 ## MODEL
 MODEL_CLASS: "LaTr"
 
+MODEL_MOD_CONFIG_CLASS: "LaTr_config" # model modified config class
+
 backbone_name: "VietAI/vit5-base"
 
 vit_model_name: "google/vit-base-patch16-224-in21k"

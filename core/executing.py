@@ -7,7 +7,7 @@ from torch.utils.data import DataLoader
 
 from logger.logger import Logger
 
-from .model.LaTr import LaTr
+from .model.LaTr import LaTr, LaTr_config
 from .data.GenVQADataset import GenVQADataset
 from .data.utils import adapt_ocr
 
@@ -28,27 +28,17 @@ class Executor():
         self.evaltype = evaltype
         self.predicttype = predicttype
         self.best_score = 0
+
         if self.mode == "train":
-            self._create_data_utils()       
-
-
-            self.model_config = AutoConfig.from_pretrained(config.backbone_name)
-
-            self.model_config.update({"max_2d_position_embeddings" : config.max_2d_position_embeddings,
-                                "vit_model" : self.config.vit_model_name})
-
-            self.model = self.build_class(self.config.MODEL_CLASS)(self.model_config)
-
-            self.model = self.model.to(self.config.DEVICE)
+            self._create_data_utils()        
+            self._build_model()
+            self._create_dataloader()
 
             self.optim = torch.optim.Adam(self.model.parameters(), lr=config.LR, betas=config.BETAS, eps=1e-9)
-
-            self.loss_fn = torch.nn.CrossEntropyLoss(ignore_index=self.tokenizer.pad_token_id)
-            
+            self.loss_fn = torch.nn.CrossEntropyLoss(ignore_index=self.tokenizer.pad_token_id)    
             self.scheduler = torch.optim.lr_scheduler.LinearLR(optimizer = self.optim, total_iters = config.warmup_step)
 
             self.SAVE = config.SAVE
-            self._create_dataloader()
 
             if os.path.isfile(os.path.join(self.config.SAVE_PATH, "last_ckp.pth")):
                 print("###Load trained checkpoint ...")
@@ -64,15 +54,7 @@ class Executor():
             
         if self.mode in ["eval", "predict"]:
             self._init_eval_predict_mode()
-
-            self.model_config = AutoConfig.from_pretrained(config.backbone_name)
-
-            self.model_config.update({"max_2d_position_embeddings" : config.max_2d_position_embeddings,
-                                "vit_model" : self.config.vit_model_name})
-
-
-            self.model = LaTr(self.model_config)
-            self.model = self.model.to(self.config.DEVICE)
+            self._build_model()
 
     def run(self):
         log = Logger("./terminal.txt")
@@ -158,56 +140,17 @@ class Executor():
     def evaluate(self):
         print("###Evaluate Mode###")
 
-        if os.path.isfile(os.path.join(self.config.SAVE_PATH, f"{self.evaltype}_ckp.pth")):
-            print("###Load trained checkpoint ...")
-            ckp = torch.load(os.path.join(self.config.SAVE_PATH, f"{self.evaltype}_ckp.pth"))
-            try:
-                print(f"\t- Using {self.evaltype} train epoch: {ckp['epoch']}")
-            except:
-                print(f"\t- Using {self.evaltype} train step: {ckp['step']}")
-            self.model.load_state_dict(ckp['state_dict'])
-
-        elif os.path.isfile(os.path.join('./models', f"{self.evaltype}_ckp.pth")):
-            print("###Load trained checkpoint ...")
-            ckp = torch.load(os.path.join('./models', f"{self.evaltype}_ckp.pth"))
-            try:
-                print(f"\t- Using {self.evaltype} train epoch: {ckp['epoch']}")
-            except:
-                print(f"\t- Using {self.evaltype} train step: {ckp['step']}")
-            self.model.load_state_dict(ckp['state_dict'])
-        
-        else:
-            print(f"(!) {self.evaltype}_ckp.pth is required (!)")
-            return 
+        self._load_trained_checkpoint(self.evaltype)
         
         with torch.no_grad():
-            print(f'Evaluate val data ...')
-
             res = self._evaluate_metrics()
+            print(f'\t#EVALUATION:\n')
             print(res)
     
     def predict(self): 
         print("###Predict Mode###")
-        if os.path.isfile(os.path.join(self.config.SAVE_PATH, f"{self.predicttype}_ckp.pth")):
-            print("###Load trained checkpoint ...")
-            ckp = torch.load(os.path.join(self.config.SAVE_PATH, f"{self.predicttype}_ckp.pth"))
-            try:
-                print(f"\t- Using {self.predicttype} train epoch: {ckp['epoch']}")
-            except:
-                print(f"\t- Using {self.predicttype} train step: {ckp['step']}")
-            self.model.load_state_dict(ckp['state_dict'])
-
-        elif os.path.isfile(os.path.join('./models', f"{self.predicttype}_ckp.pth")):
-            print("###Load trained checkpoint ...")
-            ckp = torch.load(os.path.join('./models', f"{self.predicttype}_ckp.pth"))
-            try:
-                print(f"\t- Using {self.predicttype} train epoch: {ckp['epoch']}")
-            except:
-                print(f"\t- Using {self.predicttype} train step: {ckp['step']}")
-            self.model.load_state_dict(ckp['state_dict'])
-        else:
-            print(f"(!) {self.predicttype}_ckp.pth is required  (!)")
-            return
+        
+        self._load_trained_checkpoint(self.predicttype)
 
         print("## START PREDICTING ... ")
 
@@ -229,7 +172,69 @@ class Executor():
             with open(os.path.join(".","results.csv"), 'w', encoding='utf-8') as f:
                 json.dump(results, f, ensure_ascii=False, indent=4)
             print("Saved Results !")
-          
+
+    def infer(self, dataloader, max_length):
+        self.model.eval()
+
+        decoded_preds = []
+
+        with tqdm(desc='Inferring... ', unit='it', total=len(list(dataloader))) as pbar:
+            with torch.no_grad():
+                for it, batch in enumerate(dataloader):
+                    pixel_values = batch['pixel_values'].to(self.config.DEVICE)
+                    bbox = batch['bbox'].to(self.config.DEVICE)
+                    input_ids = batch['input_ids'].to(self.config.DEVICE)
+                    attention_mask = batch['attention_mask'].to(self.config.DEVICE)
+                    bbox_attention_mask = batch['bbox_attention_mask'].to(self.config.DEVICE)
+                    tokenized_ocr = batch['tokenized_ocr'].to(self.config.DEVICE)
+
+                    pred = self.model.generate( pixel_values,
+                                                bbox,
+                                                input_ids,
+                                                attention_mask,
+                                                bbox_attention_mask,
+                                                tokenized_ocr,
+                                                max_length = max_length)
+
+                    decoded_preds += self.tokenizer.batch_decode(self._infer_post_processing(pred.tolist()), skip_special_tokens=True)
+
+                    pbar.update()
+
+        return decoded_preds
+    
+    def _build_model(self):
+        if self.config.MODEL_MOD_CONFIG_CLASS is not None:   
+            self.model_config = self.build_class(self.config.MODEL_MOD_CONFIG_CLASS)(self.config)
+        else:
+            self.model_config = AutoConfig.from_pretrained(self.config.backbone_name)
+
+        self.model = self.build_class(self.config.MODEL_CLASS)(self.model_config)
+        self.model = self.model.to(self.config.DEVICE)
+    
+    def _load_trained_checkpoint(self, loadtype):
+
+        if os.path.isfile(os.path.join(self.config.SAVE_PATH, f"{loadtype}_ckp.pth")):
+            print("###Load trained checkpoint ...")
+            ckp = torch.load(os.path.join(self.config.SAVE_PATH, f"{loadtype}_ckp.pth"))
+            try:
+                print(f"\t- Using {loadtype} train epoch: {ckp['epoch']}")
+            except:
+                print(f"\t- Using {loadtype} train step: {ckp['step']}")
+            self.model.load_state_dict(ckp['state_dict'])
+
+        elif os.path.isfile(os.path.join('./models', f"{loadtype}_ckp.pth")):
+            print("###Load trained checkpoint ...")
+            ckp = torch.load(os.path.join('./models', f"{loadtype}_ckp.pth"))
+            try:
+                print(f"\t- Using {loadtype} train epoch: {ckp['epoch']}")
+            except:
+                print(f"\t- Using {loadtype} train step: {ckp['step']}")
+            self.model.load_state_dict(ckp['state_dict'])
+        
+        else:
+            raise Exception(f"(!) {loadtype}_ckp.pth is required (!)")
+
+
     def _create_data_utils(self):
         
         self.tokenizer = AutoTokenizer.from_pretrained(self.config.backbone_name)
@@ -503,9 +508,7 @@ class Executor():
                     print(f"\n# BEST RESULT:\n\tStep: {m_step}\n\tBest F1: {m_f1:.4f}")
                     print(f"#----------- TRAINING END-Time: { e_train_time-s_train_time} -----------------#")
                     return
-    
-        
-    
+       
     def _infer_post_processing(self, out_ids):
         res = []
         for out in out_ids:
@@ -515,36 +518,6 @@ class Executor():
                 res.append(out)
 
         return res
-
-    def infer(self, dataloader, max_length):
-        self.model.eval()
-
-        decoded_preds = []
-
-        with tqdm(desc='Inferring... ', unit='it', total=len(list(dataloader))) as pbar:
-            with torch.no_grad():
-                for it, batch in enumerate(dataloader):
-                    pixel_values = batch['pixel_values'].to(self.config.DEVICE)
-                    bbox = batch['bbox'].to(self.config.DEVICE)
-                    input_ids = batch['input_ids'].to(self.config.DEVICE)
-                    attention_mask = batch['attention_mask'].to(self.config.DEVICE)
-                    bbox_attention_mask = batch['bbox_attention_mask'].to(self.config.DEVICE)
-                    tokenized_ocr = batch['tokenized_ocr'].to(self.config.DEVICE)
-
-                    pred = self.model.generate( pixel_values,
-                                                bbox,
-                                                input_ids,
-                                                attention_mask,
-                                                bbox_attention_mask,
-                                                tokenized_ocr,
-                                                max_length = max_length)
-
-                    decoded_preds += self.tokenizer.batch_decode(self._infer_post_processing(pred.tolist()), skip_special_tokens=True)
-
-                    pbar.update()
-
-        return decoded_preds
-
 
     def _evaluate_metrics(self):
         if self.mode == "predict":
