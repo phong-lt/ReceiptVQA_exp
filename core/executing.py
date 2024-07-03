@@ -63,7 +63,7 @@ class Executor():
                 self.best_score = ckp['best_score']
             
         if self.mode in ["eval", "predict"]:
-            self.init_eval_predict_mode()
+            self._init_eval_predict_mode()
 
             self.model_config = AutoConfig.from_pretrained(config.backbone_name)
 
@@ -74,7 +74,25 @@ class Executor():
             self.model = LaTr(self.model_config)
             self.model = self.model.to(self.config.DEVICE)
 
-   
+    def run(self):
+        log = Logger("./terminal.txt")
+        log.start()
+
+        if self.mode =='train':
+            if self.config.STEP_MODE:
+                print("# Training on steps... #")
+                self._train_step()
+            else:
+                print("# Training on epochs... #")
+                self.train()
+        elif self.mode == 'eval':
+            self.evaluate()
+        elif self.mode == 'predict':
+            self.predict()
+        else:
+            exit(-1)
+
+        log.stop()
 
     def train(self):
         if not self.config.SAVE_PATH:
@@ -211,27 +229,7 @@ class Executor():
             with open(os.path.join(".","results.csv"), 'w', encoding='utf-8') as f:
                 json.dump(results, f, ensure_ascii=False, indent=4)
             print("Saved Results !")
-    
-    def run(self):
-        log = Logger("./terminal.txt")
-        log.start()
-
-        if self.mode =='train':
-            if self.config.STEP_MODE:
-                print("# Training on steps... #")
-                self._train_step()
-            else:
-                print("# Training on epochs... #")
-                self.train()
-        elif self.mode == 'eval':
-            self.evaluate()
-        elif self.mode == 'predict':
-            self.predict()
-        else:
-            exit(-1)
-
-        log.stop()
-            
+          
     def _create_data_utils(self):
         
         self.tokenizer = AutoTokenizer.from_pretrained(self.config.backbone_name)
@@ -274,7 +272,7 @@ class Executor():
         self.valiter = DataLoader(dataset = self.val_data, 
                                     batch_size=self.config.EVAL_BATCH_SIZE)
 
-    def init_eval_predict_mode(self):
+    def _init_eval_predict_mode(self):
         self.tokenizer = AutoTokenizer.from_pretrained(self.config.backbone_name)
 
         if self.mode == "eval":
@@ -508,7 +506,7 @@ class Executor():
     
         
     
-    def infer_post_processing(self, out_ids):
+    def _infer_post_processing(self, out_ids):
         res = []
         for out in out_ids:
             try:
@@ -541,7 +539,7 @@ class Executor():
                                                 tokenized_ocr,
                                                 max_length = max_length)
 
-                    decoded_preds += self.tokenizer.batch_decode(self.infer_post_processing(pred.tolist()), skip_special_tokens=True)
+                    decoded_preds += self.tokenizer.batch_decode(self._infer_post_processing(pred.tolist()), skip_special_tokens=True)
 
                     pbar.update()
 
