@@ -2,9 +2,10 @@ from .bleu import Bleu
 from .rouge import Rouge
 from .accuracy import Accuracy
 from .f1 import F1
+from .anls_metrics import ANLS
 
 def compute_scores(gts, gen):
-    metrics = (Bleu(), Rouge(), Accuracy(), F1())
+    metrics = (Bleu(), Rouge(), Accuracy(), F1(), ANLS())
     all_score = {}
     all_scores = {}
     for metric in metrics:
