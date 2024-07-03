@@ -1,4 +1,5 @@
 import os
+import sys
 import json
 import torch
 import pandas as pd
@@ -9,7 +10,6 @@ from logger.logger import Logger
 from .model.LaTr import LaTr
 from .data.GenVQADataset import GenVQADataset
 from .data.utils import adapt_ocr
-from utils.class_builder import str_to_class
 
 from timeit import default_timer as timer
 from tqdm import tqdm
@@ -37,7 +37,7 @@ class Executor():
             self.model_config.update({"max_2d_position_embeddings" : config.max_2d_position_embeddings,
                                 "vit_model" : self.config.vit_model_name})
 
-            self.model = str_to_class(self.config.MODEL_CLASS)(self.model_config)
+            self.model = self.build_class(self.config.MODEL_CLASS)(self.model_config)
 
             self.model = self.model.to(self.config.DEVICE)
 
@@ -573,3 +573,9 @@ class Executor():
             return result, score
 
         return score
+    
+    def build_class(self, classname):
+        """
+        convert string -> class
+        """
+        return getattr(sys.modules[__name__], classname)
