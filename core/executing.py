@@ -9,6 +9,7 @@ from logger.logger import Logger
 from .model.LaTr import LaTr
 from .data.GenVQADataset import GenVQADataset
 from .data.utils import adapt_ocr
+from utils.class_builder import str_to_class
 
 from timeit import default_timer as timer
 from tqdm import tqdm
@@ -36,7 +37,7 @@ class Executor():
             self.model_config.update({"max_2d_position_embeddings" : config.max_2d_position_embeddings,
                                 "vit_model" : self.config.vit_model_name})
 
-            self.model = LaTr(self.model_config)
+            self.model = str_to_class(self.config.MODEL_CLASS)(self.model_config)
 
             self.model = self.model.to(self.config.DEVICE)
 
@@ -550,12 +551,12 @@ class Executor():
     def _evaluate_metrics(self):
         if self.mode == "predict":
             pred = self.infer(self.predictiter, self.config.max_predict_length)
-            answers_gt = [i.strip().lower() for i in self.predict_answer]
+            answers_gt = [i.strip() for i in self.predict_answer]
         else:
             pred = self.infer(self.valiter, self.config.max_eval_length)
-            answers_gt = [i.strip().lower() for i in self.val_answer]
+            answers_gt = [i.strip() for i in self.val_answer]
 
-        answers_gen = [[i.strip().lower()] for i in pred]
+        answers_gen = [[i.strip()] for i in pred]
 
         gens = {}
         gts = {}
