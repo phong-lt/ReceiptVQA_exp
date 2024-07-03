@@ -7,7 +7,7 @@ class LaTr_config:
         model_config = AutoConfig.from_pretrained(config.backbone_name)
 
         model_config.update({"max_2d_position_embeddings" : config.max_2d_position_embeddings,
-                                "vit_model" : self.config.vit_model_name})
+                                "vit_model" : config.vit_model_name})
         
         return model_config
 

@@ -204,7 +204,7 @@ class Executor():
     
     def _build_model(self):
         if self.config.MODEL_MOD_CONFIG_CLASS is not None:   
-            self.model_config = self.build_class(self.config.MODEL_MOD_CONFIG_CLASS)(self.config)
+            self.model_config = self.build_class(self.config.MODEL_MOD_CONFIG_CLASS)().build(self.config)
         else:
             self.model_config = AutoConfig.from_pretrained(self.config.backbone_name)
 
