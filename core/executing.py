@@ -294,7 +294,7 @@ class Executor():
             
             self.val_answer = list(val_qa_df["answer"])
             self.valiter = DataLoader(dataset = self.val_data, 
-                                    batch_size=self.config.BATCH_SIZE)
+                                    batch_size=self.config.EVAL_BATCH_SIZE)
 
         elif self.mode == "predict":
             print("###Load predict data ...")
