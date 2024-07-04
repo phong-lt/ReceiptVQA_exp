@@ -12,12 +12,7 @@ class ANLS:
         res = {key: value[0] for key, value in res.items()}
         scores = []
         for key in res:
-            r = res[key]
-            scores_per_res = []
-            for gt in gts[key]:
-                scores_per_res.append(anls_score(prediction=r[0], gold_labels=gt, threshold=0.5))
-            score = np.array(scores_per_res).mean()
-            scores.append(score)
+            scores.append(anls_score(prediction=res[key], gold_labels=gts[key], threshold=0.5))
 
         scores = np.array(scores)
 
