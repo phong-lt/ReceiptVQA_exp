@@ -227,8 +227,8 @@ class PlainT5Executor():
         
         self.tokenizer = AutoTokenizer.from_pretrained(self.config.backbone_name)
 
-        train_qa_df = pd.read_csv(self.config.qa_train_path)[["image_id", "question", "answer", "filename"]]
-        val_qa_df = pd.read_csv(self.config.qa_val_path)[["image_id", "question", "answer", "filename"]]
+        train_qa_df = pd.read_csv(self.config.qa_train_path)[["image_id", "question_id", "question", "answer", "filename"]]
+        val_qa_df = pd.read_csv(self.config.qa_val_path)[["image_id", "question_id", "question", "answer", "filename"]]
         self.val_answer = list(val_qa_df["answer"])
 
         ocr_df = textonly_ocr_adapt(self.config.ocr_path)
@@ -266,7 +266,7 @@ class PlainT5Executor():
 
         if self.mode == "eval":
             print("###Load eval data ...")
-            val_qa_df = pd.read_csv(self.config.qa_val_path)[["image_id", "question", "answer", "filename"]]
+            val_qa_df = pd.read_csv(self.config.qa_val_path)[["image_id", "question_id", "question", "answer", "filename"]]
         
             ocr_df = textonly_ocr_adapt(self.config.ocr_path)
 
@@ -284,7 +284,7 @@ class PlainT5Executor():
 
         elif self.mode == "predict":
             print("###Load predict data ...")
-            predict_qa_df = pd.read_csv(self.config.qa_predict_path)[["image_id", "question", "answer", "filename"]]
+            predict_qa_df = pd.read_csv(self.config.qa_predict_path)[["image_id", "question_id", "question", "answer", "filename"]]
         
             ocr_df = textonly_ocr_adapt(self.config.ocr_path)
 
@@ -311,7 +311,7 @@ class PlainT5Executor():
         with tqdm(desc='Epoch %d - Training ' % epoch , unit='it', total=len(list(self.trainiter))) as pbar:
             for it, batch in enumerate(self.trainiter):
                 decoder_attention_mask = batch['label_attention_mask'].to(self.config.DEVICE)
-                labels = batch['labels'].type(torch.long).to(self.config.DEVICE)
+                labels = batch['label_ids'].type(torch.long).to(self.config.DEVICE)
 
 
                 trg_input = labels[:, :-1]
@@ -349,7 +349,7 @@ class PlainT5Executor():
                 for it, batch in enumerate(self.valiter):
 
                     decoder_attention_mask = batch['label_attention_mask'].to(self.config.DEVICE)
-                    labels = batch['labels'].type(torch.long).to(self.config.DEVICE)
+                    labels = batch['label_ids'].type(torch.long).to(self.config.DEVICE)
 
 
                     trg_input = labels[:, :-1]
@@ -400,7 +400,7 @@ class PlainT5Executor():
         while True:
             for batch in self.trainiter:
                 decoder_attention_mask = batch['label_attention_mask'].to(self.config.DEVICE)
-                labels = batch['labels'].type(torch.long).to(self.config.DEVICE)
+                labels = batch['label_ids'].type(torch.long).to(self.config.DEVICE)
 
 
                 trg_input = labels[:, :-1]

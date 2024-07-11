@@ -37,7 +37,7 @@ qa_val_path: "./ReceiptVQA/ReceiptVQA_dev.csv"
 qa_predict_path:  "./ReceiptVQA/ReceiptVQA_dev.csv"
 
 ## MODEL
-MODEL_CLASS: "LaTr"
+MODEL_CLASS: "PlainT5"
 
 MODEL_MOD_CONFIG_CLASS: # model modified config class
 
