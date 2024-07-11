@@ -7,9 +7,8 @@ from torch.utils.data import DataLoader
 
 from logger.logger import Logger
 
-from model.PlainT5 import PlainT5
-from data.TextOnlyVQADataset import TextOnlyVQADataset
-from data.utils import textonly_ocr_adapt
+from core.model import PlainT5
+from core.data import TextOnlyVQADataset, textonly_ocr_adapt
 
 from timeit import default_timer as timer
 from tqdm import tqdm

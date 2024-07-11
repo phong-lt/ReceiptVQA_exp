@@ -7,9 +7,8 @@ from torch.utils.data import DataLoader
 
 from logger.logger import Logger
 
-from model.LaTr import LaTr, LaTr_config
-from data.GenVQADataset import GenVQADataset
-from data.utils import adapt_ocr
+from core.model import LaTr, LaTr_config
+from core.data import GenVQADataset, adapt_ocr
 
 from timeit import default_timer as timer
 from tqdm import tqdm
