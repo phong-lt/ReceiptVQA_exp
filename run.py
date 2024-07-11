@@ -30,7 +30,5 @@ if __name__ == '__main__':
 
     config = get_config(args.config_file)
 
-    #exec = Executor(config, args.mode, args.evaltype, args.predicttype)
-
     exec = getattr(sys.modules[__name__], config.EXECUTOR)(config, args.mode, args.evaltype, args.predicttype)
     exec.run()
