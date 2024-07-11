@@ -18,7 +18,7 @@ python ReceiptVQA_exp/run.py \
 	# config file path
 	--config-file ReceiptVQA_exp/config/latr.yaml \
  
-	# mode: train - pretrain/train models, eval - evaluate models, predict - predict trained models
+	# mode: train - to train models, eval - to evaluate models, predict - to predict trained models
 	--mode train \
 
 	# evaltype: last - evaluate lattest saved model, best - evaluate best-score saved model 
