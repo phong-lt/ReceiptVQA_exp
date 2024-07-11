@@ -28,3 +28,17 @@ def adapt_ocr(ocr_root):
         ocr_info.append(ocr_info_)
     
     return pd.DataFrame({'image_id':image_id, 'ocr_info':ocr_info})
+
+def textonly_ocr_adapt(ocr_root):
+    image_id = []
+    ocr_info = []
+
+    for ocr_file in os.listdir(ocr_root):
+        image_id.append(int(ocr_file[:-4]))
+
+        o = np.load(os.path.join(ocr_root, ocr_file), allow_pickle=True)
+        texts = o.tolist()['texts']
+        
+        ocr_info.append(texts)
+    
+    return pd.DataFrame({'image_id':image_id, 'texts':ocr_info})
