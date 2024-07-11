@@ -21,9 +21,9 @@ python ReceiptVQA_exp/run.py \
 	# mode: train - pretrain/train models, eval - evaluate models, predict - predict trained models
 	--mode train \
 
-	# evaltype: last - evaluate lattest saved model, best - evaluate best-err saved model 
+	# evaltype: last - evaluate lattest saved model, best - evaluate best-score saved model 
 	--evaltype last \
 	
-	# predicttype: last - predict lattest saved model, best - predict best-err saved model 
+	# predicttype: last - predict lattest saved model, best - predict best-score saved model 
 	--predicttype best \
 ```
