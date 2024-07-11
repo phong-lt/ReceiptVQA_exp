@@ -1,7 +1,7 @@
 from torch import nn
 from transformers import T5ForConditionalGeneration
 
-class PlainModel(nn.Module):
+class PlainT5(nn.Module):
     def __init__(self,
                 config
                 ):

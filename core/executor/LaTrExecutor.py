@@ -20,7 +20,7 @@ from transformers import AutoTokenizer, AutoConfig
 import itertools
 
 
-class Executor():
+class LaTrExecutor():
     def __init__(self, config, mode = 'train', evaltype='last', predicttype='best'):
         print("---Initializing Executor---")
         self.mode = mode

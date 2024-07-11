@@ -7,7 +7,7 @@ from torch.utils.data import DataLoader
 
 from logger.logger import Logger
 
-from model.PlainT5 import PlainModel
+from model.PlainT5 import PlainT5
 from data.TextOnlyVQADataset import TextOnlyVQADataset
 from data.utils import textonly_ocr_adapt
 
@@ -20,7 +20,7 @@ from transformers import AutoTokenizer, AutoConfig
 import itertools
 
 
-class Executor():
+class PlainT5Executor():
     def __init__(self, config, mode = 'train', evaltype='last', predicttype='best'):
         print("---Initializing Executor---")
         self.mode = mode
