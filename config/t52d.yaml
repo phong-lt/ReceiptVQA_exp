@@ -1,0 +1,49 @@
+EXECUTOR: "T52DExecutor"
+## Training param
+DEVICE: "cuda"
+
+SAVE: TRUE
+SAVE_PATH: "ReceiptVQA_exp/models/"
+
+LR: 0.0001
+BETAS: 
+  - 0.9
+  - 0.98
+
+warmup_step: 1000
+
+###EPOCH mode
+NUM_EPOCHS: 10
+TRAIN_BATCH_SIZE: 8
+EVAL_BATCH_SIZE: 8
+PREDICT_BATCH_SIZE: 16
+
+###STEP mode
+STEP_MODE: FALSE
+END_STEP: 50000
+show_loss_after_steps: 200
+eval_after_steps: 2000
+
+max_predict_length: 128
+max_eval_length: 20
+
+get_predict_score: TRUE
+
+##DATA
+ocr_path: "./google_ocr"
+max_input_length: 512
+max_output_length: 256
+
+qa_train_path: "./ReceiptVQA/ReceiptVQA_train.csv"
+qa_val_path: "./ReceiptVQA/ReceiptVQA_dev.csv"
+qa_predict_path:  "./ReceiptVQA/ReceiptVQA_dev.csv"
+
+## MODEL
+MODEL_CLASS: "T52D"
+
+MODEL_MOD_CONFIG_CLASS: # model modified config class
+
+backbone_name: "VietAI/vit5-base"
+
+
+

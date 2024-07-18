@@ -1,5 +1,5 @@
 from config.config import get_config
-from core.executor import LaTrExecutor, PlainT5Executor
+from core.executor import LaTrExecutor, PlainT5Executor, T52DExecutor
 import sys
 import argparse
 
