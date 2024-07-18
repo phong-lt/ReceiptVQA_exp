@@ -8,9 +8,12 @@ from .modules import (
     )
 
 class T52D(nn.Module):
-    def __init__(self, backbone_name):
+    def __init__(self, config):
         super().__init__()
-        self.backbone = T52dForConditionalGeneration.from_pretrained(backbone_name)
+        
+        self.config = config
+        
+        self.backbone = T52dForConditionalGeneration.from_pretrained(self.config._name_or_path)
         self.rel2Dbias = RelativePositionBiasAggregated([RelativePositionBias1D(num_heads = self.backbone.config.num_heads),
                                                         RelativePositionBiasHorizontal(num_heads = self.backbone.config.num_heads),
                                                         RelativePositionBiasVertical(num_heads = self.backbone.config.num_heads)])
