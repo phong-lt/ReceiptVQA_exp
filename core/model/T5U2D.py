@@ -33,13 +33,12 @@ class T5U2D(nn.Module):
         self.config = config
 
         self.spatial_module = SpatialModule(self.config.d_model)
+        
+        self.backbone = T52dForConditionalGeneration.from_pretrained(self.config._name_or_path)
 
         self.rel2Dbias = RelativePositionBiasAggregated([RelativePositionBias1D(num_heads = self.backbone.config.num_heads),
                                                         RelativePositionBiasHorizontal(num_heads = self.backbone.config.num_heads),
                                                         RelativePositionBiasVertical(num_heads = self.backbone.config.num_heads)])
-        
-        self.backbone = T52dForConditionalGeneration.from_pretrained(self.config._name_or_path)
-        
 
     def forward(self,
                 pixel_values,
