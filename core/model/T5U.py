@@ -11,7 +11,7 @@ class SpatialModule(nn.Module):
         self.proj = nn.Linear(128*3*3, d_model)
 
     def forward(self, pixel_values, coordinates):
-        out = self.roi_pool(self.unet(pixel_values).reshape(), 
+        out = self.roi_pool(self.unet(pixel_values), 
                             coordinates)
         
         batch_size, seq_length = out.size(0), out.size(1)
