@@ -2,9 +2,9 @@ from config.config import get_config
 from core.executor import (
     LaTrExecutor, 
     PlainT5Executor, 
-    T52DExecutor, 
-    T5UExecutor, 
-    T52DUExecutor)
+    T52DExecutor,
+    T5U2DExecutor, 
+    T5UExecutor)
 import sys
 import argparse
 

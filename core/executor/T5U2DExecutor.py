@@ -7,7 +7,7 @@ from torch.utils.data import DataLoader
 
 from logger.logger import Logger
 
-from core.model import T52DU
+from core.model import T5U2D
 from core.data import Text2DUVQADataset, textlayout_ocr_adapt
 
 from timeit import default_timer as timer
@@ -19,7 +19,7 @@ from transformers import AutoTokenizer, AutoConfig
 import itertools
 
 
-class T5UExecutor():
+class T5U2DExecutor():
     def __init__(self, config, mode = 'train', evaltype='last', predicttype='best'):
         print("---Initializing Executor---")
         self.mode = mode
