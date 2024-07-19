@@ -5,3 +5,8 @@ from .utils_2D import (
     RelativePositionBiasVertical, 
     RelativePositionBiasAggregated
     )
+
+from .Unet import (
+    UNet,
+    RoIPool
+)
