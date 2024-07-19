@@ -33,6 +33,8 @@ ocr_path: "./google_ocr"
 max_input_length: 512
 max_output_length: 256
 
+NUMWORKERS: 5
+
 base_img_path: "./uimage"
 
 qa_train_path: "./ReceiptVQA/ReceiptVQA_train.csv"

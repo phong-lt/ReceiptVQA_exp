@@ -59,6 +59,9 @@ class T5UExecutor():
         log = Logger("./terminal.txt")
         log.start()
 
+        if self.config.NUMWORKERS:
+            os.environ["TOKENIZERS_PARALLELISM"] = "true"
+
         if self.mode =='train':
             if self.config.STEP_MODE:
                 print("# Training on steps... #")
@@ -259,8 +262,10 @@ class T5UExecutor():
        
         self.trainiter = DataLoader(dataset = self.train_data, 
                                     batch_size=self.config.TRAIN_BATCH_SIZE, 
+                                    num_workers=self.config.NUMWORKERS,
                                     shuffle=True)
         self.valiter = DataLoader(dataset = self.val_data, 
+                                    num_workers=self.config.NUMWORKERS,
                                     batch_size=self.config.EVAL_BATCH_SIZE)
 
     def _init_eval_predict_mode(self):
@@ -282,6 +287,7 @@ class T5UExecutor():
             
             self.val_answer = list(val_qa_df["answer"])
             self.valiter = DataLoader(dataset = self.val_data, 
+                                    num_workers=self.config.NUMWORKERS,
                                     batch_size=self.config.EVAL_BATCH_SIZE)
 
         elif self.mode == "predict":
@@ -304,6 +310,7 @@ class T5UExecutor():
                 self.predict_answer = None
 
             self.predictiter = DataLoader(dataset = self.predict_data, 
+                                    num_workers=self.config.NUMWORKERS,
                                     batch_size=self.config.PREDICT_BATCH_SIZE)
 
     def _train_epoch(self, epoch):

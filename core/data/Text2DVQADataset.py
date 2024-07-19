@@ -147,7 +147,7 @@ class Text2DUVQADataset(Dataset):
         return {
             'input_ids': torch.tensor([self.data['input_ids'][idx]], dtype=torch.int64).squeeze(0),
             'coordinates': torch.tensor([self.data['bbox'][idx]], dtype=torch.float64).squeeze(0),
-            'pixel_values': torch.permute(self.data['pixel_values'][idx].squeeze(0), (2, 0, 1))[:3,:,:],
+            'pixel_values': torch.permute(self.data['pixel_values'][idx].squeeze(0), (2, 0, 1))[:3,:,:].type(torch.FloatTensor),
             'src_attention_mask': torch.tensor([self.data['src_attention_mask'][idx]], dtype=torch.int64).squeeze(0),
             'label_ids': torch.tensor([self.data['label_ids'][idx]], dtype=torch.int64).squeeze(0),
             'label_attention_mask': torch.tensor([self.data['label_attention_mask'][idx]], dtype=torch.int64).squeeze(0),
