@@ -1,11 +1,12 @@
 from .bleu import Bleu
 from .rouge import Rouge
+from .cider import Cider
 from .accuracy import Accuracy
 from .f1 import F1
 from .anls_metric import ANLS
 
 def compute_scores(gts, gen):
-    metrics = (Bleu(), Rouge(), Accuracy(), F1(), ANLS())
+    metrics = (ANLS(), F1(), Accuracy(), Cider())
     all_score = {}
     all_scores = {}
     for metric in metrics:
