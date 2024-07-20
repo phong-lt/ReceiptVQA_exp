@@ -27,3 +27,7 @@ python ReceiptVQA_exp/run.py \
 	# predicttype: last - predict lattest saved model, best - predict best-score saved model 
 	--predicttype best \
 ```
+
+## Contact
+
+- Thanh-Phong Le: [21520395@gm.uit.edu.vn](mailto:21520395@gm.uit.edu.vn)
