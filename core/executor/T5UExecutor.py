@@ -236,7 +236,7 @@ class T5UExecutor():
         val_qa_df = pd.read_csv(self.config.qa_val_path)[["image_id", "question_id", "question", "answer", "filename"]]
         self.val_answer = list(val_qa_df["answer"])
 
-        ocr_df = textlayout_ocr_adapt(self.config.ocr_path, h_scale=64, w_scale=48)
+        ocr_df = textlayout_ocr_adapt(self.config.ocr_path, h_scale=512, w_scale=384)
 
         print("# Creating Datasets")
         
@@ -275,7 +275,7 @@ class T5UExecutor():
             print("###Load eval data ...")
             val_qa_df = pd.read_csv(self.config.qa_val_path)[["image_id", "question_id", "question", "answer", "filename"]]
         
-            ocr_df = textlayout_ocr_adapt(self.config.ocr_path, h_scale=64, w_scale=48)
+            ocr_df = textlayout_ocr_adapt(self.config.ocr_path, h_scale=512, w_scale=384)
 
             self.val_data = Text2DUVQADataset(
                                             qa_df = val_qa_df,
@@ -294,7 +294,7 @@ class T5UExecutor():
             print("###Load predict data ...")
             predict_qa_df = pd.read_csv(self.config.qa_predict_path)[["image_id", "question_id", "question", "answer", "filename"]]
         
-            ocr_df = textlayout_ocr_adapt(self.config.ocr_path, h_scale=64, w_scale=48)
+            ocr_df = textlayout_ocr_adapt(self.config.ocr_path, h_scale=512, w_scale=384)
 
             self.predict_data = Text2DUVQADataset(
                                                 qa_df = predict_qa_df,

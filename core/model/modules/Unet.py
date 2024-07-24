@@ -136,9 +136,10 @@ class UNet(nn.Module):
 
 class RoIPool(nn.Module):
 
-    def __init__(self, output_size=(3, 3)):
+    def __init__(self, output_size=(3, 3), spatial_scale=0.125):
         super().__init__()
         self.output_size = output_size
+        self.spatial_scale = spatial_scale
         self.roi_pool = roi_pool
 
     def forward(self, image_embedding, bboxes):
@@ -148,7 +149,8 @@ class RoIPool(nn.Module):
             feature_map_single_batch = self.roi_pool(input=single_batch_img.unsqueeze(0),
                                                      boxes=torch.cat([torch.zeros(single_batch_bbox.shape[0], 1).to(
                                                          single_batch_bbox.device), single_batch_bbox], axis=-1).float(),
-                                                     output_size=self.output_size
+                                                     output_size=self.output_size,
+                                                     spatial_scale = self.spatial_scale
                                                      )
             feature_maps_bboxes.append(feature_map_single_batch)
 
