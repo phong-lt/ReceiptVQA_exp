@@ -48,12 +48,12 @@ class LaTr(nn.Module):
 
         self.spatial_feat_extractor = SpatialModule(config)
         self.vit = ViTModel.from_pretrained(config.vit_model)
+        self.visual_proj = nn.Linear(self.vit.config.hidden_size, self.backbone.config.d_model)
 
         #freeze ViT except the last dense layer
         for name, child in self.vit.named_children():
-          if name != "pooler":
-              for param in child.parameters():
-                  param.requires_grad = False
+            for param in child.parameters():
+                param.requires_grad = False
 
     def forward(self,
                 pixel_values,
@@ -83,7 +83,7 @@ class LaTr(nn.Module):
         return self.backbone.lm_head(decoder_outputs)
 
     def calculate_embedding(self, img, bbox, input_ids, bbox_attention_mask, attention_mask, tokenized_ocr):
-        img_feat = self.vit(img).last_hidden_state
+        img_feat = self.visual_proj(self.vit(img).last_hidden_state)
         spatial_feat = self.spatial_feat_extractor(bbox)
         ocr_feat = self.backbone.shared(tokenized_ocr)
         language_feat = self.backbone.shared(input_ids)
