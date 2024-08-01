@@ -30,8 +30,8 @@ get_predict_score: TRUE
 ##DATA
 ocr_path: "./google_ocr"
 
-max_input_length: 512
-max_output_length: 256
+max_input_length: 384
+max_output_length: 128
 NUMWORKERS: 0
 
 base_img_path: "./uimage"
