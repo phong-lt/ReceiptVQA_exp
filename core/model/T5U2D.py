@@ -16,6 +16,8 @@ class SpatialModule(nn.Module):
         self.unet = UNet()
         self.roi_pool = RoIPool((3,3))
         self.proj = nn.Linear(128*3*3, d_model)
+        nn.init.xavier_normal_(self.proj.weight)
+        nn.init.zeros_(self.proj.bias)
 
     def forward(self, pixel_values, coordinates):
         out = self.roi_pool(self.unet(pixel_values), 
