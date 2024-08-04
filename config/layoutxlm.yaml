@@ -36,15 +36,15 @@ get_predict_score: TRUE
 ocr_path: "./google_ocr"
 max_length: 180
 
-root_feature_path: ./xlm/
+root_feature_path: ./xlm_img/
 
 qa_train_path: "./ReceiptVQA/ReceiptVQA_train.csv"
 qa_val_path: "./ReceiptVQA/ReceiptVQA_dev.csv"
 qa_predict_path:  "./ReceiptVQA/ReceiptVQA_dev.csv"
 
-DATASET_CLASS: "LiLTInfoXLMVQADataset"
+DATASET_CLASS: "LayoutXLMVQADataset"
 
 ## MODEL
-isLiLT: TRUE
+isLiLT: FALSE
 
-model_name: "SCUT-DLVCLab/lilt-infoxlm-base"
+model_name: "microsoft/layoutxlm-base"
