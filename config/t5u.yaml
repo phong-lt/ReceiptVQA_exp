@@ -12,9 +12,9 @@ BETAS:
 
 warmup_step: 1000
 
-NUM_EPOCHS: 5
+NUM_EPOCHS: 10
 TRAIN_BATCH_SIZE: 8
-EVAL_BATCH_SIZE: 8
+EVAL_BATCH_SIZE: 16
 PREDICT_BATCH_SIZE: 16
 
 STEP_MODE: FALSE
@@ -30,7 +30,7 @@ get_predict_score: TRUE
 ##DATA
 ocr_path: "./google_ocr"
 
-max_input_length: 384
+max_input_length: 180
 max_output_length: 128
 
 NUMWORKERS: 0

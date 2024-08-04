@@ -4,7 +4,8 @@ from core.executor import (
     PlainT5Executor, 
     T52DExecutor,
     T5U2DExecutor, 
-    T5UExecutor)
+    T5UExecutor,
+    ExExecutor)
 import sys
 import argparse
 
