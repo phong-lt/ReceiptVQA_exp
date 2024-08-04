@@ -40,7 +40,4 @@ DATASET_CLASS: "LiLTRobertaDataset"
 ## MODEL
 isLiLT: TRUE
 
-model_name: "PandT/lilt-roberta-xlm-base"
-
-
-
+model_name: "PandT/lilt-phobert-base-v2"

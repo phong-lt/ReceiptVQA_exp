@@ -1,3 +1,10 @@
+#!pip install transformers==4.41.1
+#!pip install pyyaml
+#!pip install torchvision==0.18.1
+#!pip install torch==2.3.1
+#!pip install pillow==9.5.0
+#!pip install --extra-index-url https://miropsota.github.io/torch_packages_builder detectron2==0.6+pt2.3.0cu121
+
 EXECUTOR: "ExExecutor"
 ## Training param
 DEVICE: "cuda"
@@ -29,18 +36,15 @@ get_predict_score: TRUE
 ocr_path: "./google_ocr"
 max_length: 180
 
-root_feature_path: 
+root_feature_path: ./xlm/
 
 qa_train_path: "./ReceiptVQA/ReceiptVQA_train.csv"
 qa_val_path: "./ReceiptVQA/ReceiptVQA_dev.csv"
 qa_predict_path:  "./ReceiptVQA/ReceiptVQA_dev.csv"
 
-DATASET_CLASS: "LiLTRobertaDataset"
+DATASET_CLASS: "LiLTInfoXLMVQADataset"
 
 ## MODEL
 isLiLT: TRUE
 
-model_name: "PandT/lilt-roberta-xlm-base"
-
-
-
+model_name: "SCUT-DLVCLab/lilt-infoxlm-base"

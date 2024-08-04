@@ -35,12 +35,9 @@ qa_train_path: "./ReceiptVQA/ReceiptVQA_train.csv"
 qa_val_path: "./ReceiptVQA/ReceiptVQA_dev.csv"
 qa_predict_path:  "./ReceiptVQA/ReceiptVQA_dev.csv"
 
-DATASET_CLASS: "LiLTRobertaDataset"
+DATASET_CLASS: "TextOnlyVQADataset"
 
 ## MODEL
-isLiLT: TRUE
+isLiLT: FALSE
 
-model_name: "PandT/lilt-roberta-xlm-base"
-
-
-
+model_name: "FacebookAI/xlm-roberta-base"

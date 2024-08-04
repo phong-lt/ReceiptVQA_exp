@@ -27,7 +27,7 @@ get_predict_score: TRUE
 
 ##DATA
 ocr_path: "./google_ocr"
-max_input_length: 180
+max_length: 180
 
 root_feature_path: 
 
@@ -35,10 +35,9 @@ qa_train_path: "./ReceiptVQA/ReceiptVQA_train.csv"
 qa_val_path: "./ReceiptVQA/ReceiptVQA_dev.csv"
 qa_predict_path:  "./ReceiptVQA/ReceiptVQA_dev.csv"
 
+DATASET_CLASS: "LiLTInfoXLMVQADataset"
+
 ## MODEL
-isLILT: TRUE
+isLiLT: TRUE
 
-model_name: "PandT/lilt-roberta-xlm-base"
-
-
-
+model_name: "SCUT-DLVCLab/lilt-infoxlm-base"

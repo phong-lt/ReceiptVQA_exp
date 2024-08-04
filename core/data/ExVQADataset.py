@@ -384,7 +384,8 @@ class LiLTInfoXLMVQADataset(torch.utils.data.Dataset):
 
 class LiLTRobertaDataset(Dataset):
     def __init__(self,
-                 dataframe,
+                 qa_df,
+                 ocr_df,
                  tokenizer,
                  root_feature_path=None,
                  batch_process = 128,
@@ -400,6 +401,7 @@ class LiLTRobertaDataset(Dataset):
         for key in self.feature:
             self.data[key] = []
 
+        dataframe = pd.merge(qa_df, ocr_df[['image_id','texts', 'bboxes']], on='image_id', how='inner')
 
         self.batch_processing(dataframe, batch_process)
 
