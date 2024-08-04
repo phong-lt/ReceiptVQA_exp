@@ -35,7 +35,7 @@ qa_train_path: "./ReceiptVQA/ReceiptVQA_train.csv"
 qa_val_path: "./ReceiptVQA/ReceiptVQA_dev.csv"
 qa_predict_path:  "./ReceiptVQA/ReceiptVQA_dev.csv"
 
-DATASET_CLASS: "LiLTRobertaDataset"
+DATASET_CLASS: "LiLTRobertaVQADataset"
 
 ## MODEL
 isLiLT: TRUE

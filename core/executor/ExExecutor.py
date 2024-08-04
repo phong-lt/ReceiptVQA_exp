@@ -11,7 +11,8 @@ from core.data import (
     TextOnlyVQADataset, 
     LayoutXLMVQADataset, 
     LiLTInfoXLMVQADataset, 
-    LiLTRobertaDataset,
+    LiLTRobertaVQADataset,
+    LiLTPhoBERTVQADataset,
     textlayout_ocr_adapt
 )
 
