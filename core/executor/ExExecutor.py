@@ -10,7 +10,6 @@ from logger.logger import Logger
 from core.data import (
     TextOnlyExVQADataset, 
     LayoutXLMVQADataset, 
-    LiLTInfoXLMVQADataset, 
     LiLTRobertaVQADataset,
     LiLTPhoBERTVQADataset,
     textlayout_ocr_adapt

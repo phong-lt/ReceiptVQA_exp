@@ -4,8 +4,7 @@ from .Text2DVQADataset import Text2DVQADataset, Text2DUVQADataset
 from .utils import adapt_ocr, textonly_ocr_adapt, textlayout_ocr_adapt
 from .ExVQADataset import (
     TextOnlyExVQADataset, 
-    LayoutXLMVQADataset, 
-    LiLTInfoXLMVQADataset, 
+    LayoutXLMVQADataset,  
     LiLTRobertaVQADataset, 
     LiLTPhoBERTVQADataset,
 )
