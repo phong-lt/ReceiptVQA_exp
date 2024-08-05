@@ -35,9 +35,9 @@ qa_train_path: "./ReceiptVQA/ReceiptVQA_train.csv"
 qa_val_path: "./ReceiptVQA/ReceiptVQA_dev.csv"
 qa_predict_path:  "./ReceiptVQA/ReceiptVQA_dev.csv"
 
-DATASET_CLASS: "LiLTInfoXLMVQADataset"
+DATASET_CLASS: "LiLTRobertaVQADataset"
 
 ## MODEL
 isLiLT: TRUE
 
-model_name: "SCUT-DLVCLab/lilt-infoxlm-base"
+model_name: "PhongLT/lilt-infoxlm-base"
