@@ -5,7 +5,7 @@ import numpy as np
 import pandas as pd
 
 
-class TextOnlyVQADataset(Dataset):
+class TextOnlyExVQADataset(Dataset):
     def __init__(self,
                  qa_df,
                  ocr_df,

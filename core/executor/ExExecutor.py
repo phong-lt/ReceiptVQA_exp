@@ -8,7 +8,7 @@ from torch.utils.data import DataLoader
 from logger.logger import Logger
 
 from core.data import (
-    TextOnlyVQADataset, 
+    TextOnlyExVQADataset, 
     LayoutXLMVQADataset, 
     LiLTInfoXLMVQADataset, 
     LiLTRobertaVQADataset,
